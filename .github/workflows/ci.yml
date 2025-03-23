@@ -19,6 +19,9 @@ jobs:
         environment: ${{github.ref_name}}
         env:
             AWS_REGION: us-east-1
+            ECR_REGISTRY: ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com
+            ECR_REPOSITORY: ${{var.ECR_REPOSITORY}}
+            IMAGE_TAG: ${{github.sha}}
 
         steps:
             - name: Checkout code
@@ -40,28 +43,28 @@ jobs:
 
             - name: Build Docker image (builder stage)
               run: |
-                docker build --target builder -t my-app-builder:${{github.sha}} .
+                docker build --target builder -t my-app-builder:${{env.IMAGE_TAG}} .
 
             - name: Run Unit Tests
               run: |
-                docker run --rm my-app-builder:${{github.sha}} npm test
+                docker run --rm my-app-builder:${{env.IMAGE_TAG}} npm test
 
             - name: Run Lint and Static Code Analysis
               run: |
-                docker run --rm my-app-builder:${{github.sha}} npm run lint
+                docker run --rm my-app-builder:${{env.IMAGE_TAG}} npm run lint
 
             - name: Build final production Docker image
               run: |
-                docker build --target runner -t ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.us-east-1.amazonaws.com/microservices_repo:${{github.sha}} .
+                docker build --target runner -t ${{env.ERC_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}} .
 
             - name: Scan Docker image for vulnerabilities
               uses: aquasecurity/trivy-action@master
               with:
-                image-ref: '${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/microservices_repo:${{ github.sha }}'
+                image-ref: '${{env.ERC_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}}'
                 format: 'table'
                 severity: 'CRITICAL,HIGH'
                 exit-code: 1
 
             - name: Push Docker image to AWS ECR
               run: |
-                docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/microservices_repo:${{ github.sha }}
+                docker push ${{env.ERC_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}}
