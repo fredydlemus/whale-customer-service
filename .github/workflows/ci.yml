@@ -18,8 +18,7 @@ jobs:
         runs-on: ubuntu-latest
         environment: ${{github.ref_name}}
         env:
-            AWS_REGION: us-east-1
-            ECR_REGISTRY: ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com
+            ECR_REGISTRY: ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.us-east-1.amazonaws.com
             ECR_REPOSITORY: ${{var.ECR_REPOSITORY}}
             IMAGE_TAG: ${{github.sha}}
 
@@ -35,7 +34,7 @@ jobs:
               with:
                 aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
                 aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                aws-region: ${{ env.AWS_REGION }}
+                aws-region: us-east-1
       
 
             - name: Login to AWS ECR
@@ -55,16 +54,16 @@ jobs:
 
             - name: Build final production Docker image
               run: |
-                docker build --target runner -t ${{env.ERC_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}} .
+                docker build --target runner -t ${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}} .
 
             - name: Scan Docker image for vulnerabilities
               uses: aquasecurity/trivy-action@master
               with:
-                image-ref: '${{env.ERC_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}}'
+                image-ref: '${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}}'
                 format: 'table'
                 severity: 'CRITICAL,HIGH'
                 exit-code: 1
 
             - name: Push Docker image to AWS ECR
               run: |
-                docker push ${{env.ERC_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}}
+                docker push ${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}}
