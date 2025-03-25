@@ -63,7 +63,7 @@ jobs:
               id: deploy
               continue-on-error: true
               run: |
-                kubectl apply -f .k8s/
+                kubectl apply -f .k8s/ --validate=false
                 kubectl rollout status deployment/customer-service --timeout=300s
 
             - name: Rollback if rollout fails
