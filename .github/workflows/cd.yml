@@ -44,11 +44,11 @@ jobs:
 
             - name: Substitute environment variables in manifest
               run: |
-                envsubst < k8s/deployment.yml > k8s/deployment.tmp.yaml
+                envsubst < .k8s/deployment.yml > .k8s/deployment.tmp.yaml
 
             - name: Rename temporary deployment file
               run: |
-                mv k8s/deployment.tmp.yaml k8s/deployment.yml
+                mv .k8s/deployment.tmp.yaml .k8s/deployment.yml
 
             #This is only for update the version of the deployment
             # - name: Deploy to EKS Cluster
