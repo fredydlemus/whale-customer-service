@@ -48,7 +48,7 @@ jobs:
 
             - name: Rename temporary deployment file
               run: |
-                mv k8s/deployment.tmp.yaml k8s/deployment.yaml
+                mv k8s/deployment.tmp.yaml k8s/deployment.yml
 
             #This is only for update the version of the deployment
             # - name: Deploy to EKS Cluster
@@ -60,12 +60,20 @@ jobs:
             # This should be improve in the future --
 
             - name: Apply Kubernetes Manifest
+              id: deploy
+              continue-on-error: true
               run: |
                 kubectl apply -f k8s/
                 kubectl rollout status deployment/customer-service --timeout=300s
 
             - name: Rollback if rollout fails
-              if: failure()
+              if: steps.deploy.outcome == 'failure'
               run: |
                 echo "⚠️ Rollout failed, rolling back..."
                 kubectl rollout undo deployment/customer-service
+
+            - name: Fail job if deploy step failed
+              if: steps.deploy.outcome == 'failure'
+              run: |
+                  echo "❌ Deployment failed. Exiting with error."
+                  exit 1
