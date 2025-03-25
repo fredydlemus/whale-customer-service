@@ -1,0 +1,71 @@
+name: CD Deploy to EKS
+
+on:
+    workflow_run:
+        workflows: ["CI Pipeline"]
+        types:
+            - completed
+        branches:
+            - dev
+
+jobs:
+    deploy:
+        name: Deploy to EKS
+        if: ${{github.event.workflow_run.conclusion == 'success'}}
+        runs-on: ubuntu-latest
+        environment: ${{github.ref_name}}
+        env:
+            ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+            ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+            IMAGE_TAG: ${{ github.sha }}
+
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v4
+
+            - name: Configure AWS Credentials
+              uses: aws-actions/configure-aws-credentials@v2
+              with:
+                aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                aws-region: us-east-1
+
+            - name: Login to AWS ECR
+              uses: aws-actions/amazon-ecr-login@v2
+
+            - name: Set up kubectl
+              uses: azure/setup-kubectl@v3
+              with:
+                version: 'latest'
+
+            - name: Update kubeconfig (EKS)
+              run: |
+                aws eks update-kubeconfig --name ${{ vars.CLUSTER_NAME }} --region us-east-1
+
+            - name: Substitute environment variables in manifest
+              run: |
+                envsubst < k8s/deployment.yaml > k8s/deployment.tmp.yaml
+
+            - name: Rename temporary deployment file
+              run: |
+                mv k8s/deployment.tmp.yaml k8s/deployment.yaml
+
+            #This is only for update the version of the deployment
+            # - name: Deploy to EKS Cluster
+            #   run: |
+            #     kubectl set image deployment/customer-service customer-service=${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}}
+
+            #     kubectl rollout status deployment/customer-service --timeout=300s
+
+            # This should be improve in the future
+
+            - name: Apply Kubernetes Manifest
+              run: |
+                kubectl apply -f k8s/
+                kubectl rollout status deployment/customer-service --timeout=300s
+
+            - name: Rollback if rollout fails
+              if: failure()
+              run: |
+                echo "⚠️ Rollout failed, rolling back..."
+                kubectl rollout undo deployment/customer-service
