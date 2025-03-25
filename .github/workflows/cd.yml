@@ -13,7 +13,7 @@ jobs:
         name: Deploy to EKS
         if: ${{github.event.workflow_run.conclusion == 'success'}}
         runs-on: ubuntu-latest
-        environment: ${{ github.event.workflow_run.head_branch }}
+        environment: dev
         env:
             ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
             ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
