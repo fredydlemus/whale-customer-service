@@ -44,7 +44,7 @@ jobs:
 
             - name: Substitute environment variables in manifest
               run: |
-                envsubst < k8s/deployment.yaml > k8s/deployment.tmp.yaml
+                envsubst < k8s/deployment.yml > k8s/deployment.tmp.yaml
 
             - name: Rename temporary deployment file
               run: |
