@@ -110,5 +110,6 @@ jobs:
                 exit-code: 1
 
             - name: Push Docker image to AWS ECR
+              if: success() && github.event_name != 'pull_request'
               run: |
                 docker push ${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}}
