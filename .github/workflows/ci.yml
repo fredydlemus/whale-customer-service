@@ -20,16 +20,16 @@ on:
             - 'Dockerfile'
             - 'package.json'
     workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Target environment to deploy'
-        required: true
-        default: 'dev'
-        type: choice
-        options:
-           - dev
-           - staging
-           - prod
+      inputs:
+        environment:
+          description: 'Target environment to deploy'
+          required: true
+          default: 'dev'
+          type: choice
+          options:
+            - dev
+            - staging
+            - prod
 
 jobs:
     build-test:
