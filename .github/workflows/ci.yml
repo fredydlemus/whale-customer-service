@@ -37,8 +37,8 @@ jobs:
         runs-on: ubuntu-latest
         environment: >-
           ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment ||
-              (startsWith(github.ref_name, 'feature/') && 'dev') ||
-              github.ref_name }}
+              (startsWith(github.head_ref || github.ref_name, 'feature/') && 'dev') ||
+              github.head_ref || github.ref_name }}
         env:
             ECR_REGISTRY: ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.us-east-1.amazonaws.com
             ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
@@ -80,8 +80,8 @@ jobs:
       needs: build-test
       environment: >-
         ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment ||
-            (startsWith(github.ref_name, 'feature/') && 'dev') ||
-            github.ref_name }}
+            (startsWith(github.head_ref || github.ref_name, 'feature/') && 'dev') ||
+            github.head_ref || github.ref_name }}
       env:
             ECR_REGISTRY: ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.us-east-1.amazonaws.com
             ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
