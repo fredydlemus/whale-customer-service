@@ -65,9 +65,7 @@ jobs:
 
             - name: Build Docker image (builder stage)
               run: |
-                docker buildx build \
-                  --target builder \
-                  -t my-app-builder:${{env.IMAGE_TAG}} .
+                docker build --target builder -t my-app-builder:${{env.IMAGE_TAG}} .
 
             - name: Run Unit Tests
               run: |
@@ -108,9 +106,8 @@ jobs:
             
             - name: Build final production Docker image
               run: |
-                docker buildx build \
-                  --target runner \
-                  -t ${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}/${{env.SERVICE_NAME}}:${{env.IMAGE_TAG}} .
+                docker build --target runner -t ${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}} .
+
 
             - name: Scan Docker image for vulnerabilities
               uses: aquasecurity/trivy-action@master
