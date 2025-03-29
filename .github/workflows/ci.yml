@@ -67,8 +67,8 @@ jobs:
               run: |
                 docker buildx build\
                   --target builder \
-                  --cache-from=type=registry,ref=${{env.ECR_REGISTRY}}/${{env.SERVICE_NAME}}:cache \
-                  --cache-to=type=registry,ref=${{env.ECR_REGISTRY}}/${{env.SERVICE_NAME}}:cache,mode=max \
+                  --cache-from=type=registry,ref=${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.SERVICE_NAME}}-cache \
+                  --cache-to=type=registry,ref=${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.SERVICE_NAME}}-cache,mode=max \
                   -t my-app-builder:${{env.IMAGE_TAG}} .
 
             - name: Run Unit Tests
@@ -112,8 +112,8 @@ jobs:
               run: |
                 docker buildx build\
                   --target runner \
-                  --cache-from=type=registry,ref=${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:cache \
-                  --cache-to=type=registry,ref=${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:cache,mode=max \
+                  --cache-from=type=registry,ref=${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.SERVICE_NAME}}-cache \
+                  --cache-to=type=registry,ref=${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.SERVICE_NAME}}-cache,mode=max \
                   -t ${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}/${{env.SERVICE_NAME}}:${{env.IMAGE_TAG}} .
 
             - name: Scan Docker image for vulnerabilities
