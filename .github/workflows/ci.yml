@@ -65,7 +65,7 @@ jobs:
 
             - name: Build Docker image (builder stage)
               run: |
-                docker buildx build\
+                docker buildx build \
                   --target builder \
                   # --cache-from=type=registry,ref=${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.SERVICE_NAME}}-cache \
                   # --cache-to=type=registry,ref=${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.SERVICE_NAME}}-cache,mode=max \
@@ -110,7 +110,7 @@ jobs:
             
             - name: Build final production Docker image
               run: |
-                docker buildx build\
+                docker buildx build \
                   --target runner \
                   # --cache-from=type=registry,ref=${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.SERVICE_NAME}}-cache \
                   # --cache-to=type=registry,ref=${{env.ECR_REGISTRY}}/${{env.ECR_REPOSITORY}}:${{env.SERVICE_NAME}}-cache,mode=max \
