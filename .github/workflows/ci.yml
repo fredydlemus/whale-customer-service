@@ -1,44 +1,12 @@
 name: CI Pipeline
 
 on:
-    push:
-        branches:
-            - main
-            - staging
-            - dev
-        paths:
-            - 'src/**'
-            - 'Dockerfile'
-            - 'package.json'
-    pull_request:
-        branches:
-            - main
-            - staging
-            - dev
-        paths:
-            - 'src/**'
-            - 'Dockerfile'
-            - 'package.json'
     workflow_dispatch:
-      inputs:
-        environment:
-          description: 'Target environment to deploy'
-          required: true
-          default: 'dev'
-          type: choice
-          options:
-            - dev
-            - staging
-            - prod
 
 jobs:
     build-test:
         name: Build, Test, and Lint
         runs-on: ubuntu-latest
-        environment: >-
-          ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment ||
-              (startsWith(github.head_ref || github.ref_name, 'feature/') && 'dev') ||
-              github.head_ref || github.ref_name }}
         env:
             ECR_REGISTRY: ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.us-east-1.amazonaws.com
             ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
@@ -52,6 +20,7 @@ jobs:
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
 
+            # TODO: Change to OIDC based authentication
             - name: Configure AWS Credentials
               uses: aws-actions/configure-aws-credentials@v2
               with:
@@ -79,10 +48,6 @@ jobs:
       name: Build Production Image, Scan, and push
       runs-on: ubuntu-latest
       needs: build-test
-      environment: >-
-        ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment ||
-            (startsWith(github.head_ref || github.ref_name, 'feature/') && 'dev') ||
-            github.head_ref || github.ref_name }}
       env:
             ECR_REGISTRY: ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.us-east-1.amazonaws.com
             ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
@@ -94,6 +59,7 @@ jobs:
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
 
+            # TODO: Change to OIDC based authentication
             - name: Configure AWS Credentials
               uses: aws-actions/configure-aws-credentials@v2
               with:
