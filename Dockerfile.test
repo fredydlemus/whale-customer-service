@@ -1,0 +1,18 @@
+#This Dockerfile is used for demonstrate the difference between test and production Dockerfiles.
+# Don't use it in production environments, for production use the default Dockerfile.
+
+FROM node:20-alpine
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+EXPOSE 3000
+
+CMD ["node", "dist/main.js"]    

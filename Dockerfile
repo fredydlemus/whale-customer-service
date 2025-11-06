@@ -1,3 +1,5 @@
+#Production Dockerfile, multi-stage build for smaller image size
+
 #Build stage
 FROM node:20-alpine AS builder
 
